@@ -1,0 +1,112 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+<div class="container mt-4" style="padding: 15rem;">
+    <div class="card">
+        <div class="card-header text-center">
+            <h2>Zapatos Bernini</h2>
+        </div>
+        <div class="card-body p-4">
+
+            <form method="POST">{% csrf_token %}
+                <legend>Realizar pedido</legend>
+                <div class="row g-2">
+                    <div class="col-md-5">
+                        <div class="form-floating">
+                            {{ form.item }}
+                            <label for="floatingInputGrid">Producto</label>
+                        </div>
+                    </div>
+                    <div class="col-md-5">
+                        <div class="form-floating">
+                            {{ form.quantity }}
+                            <label for="floatingSelectGrid">Cantidad</label>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <button type="submit" class="btn btn-primary">Añadir</button>
+                    </div>
+                </div>
+                {% if form.errors %}
+                <div class="col-md-12">
+                    <div class="alert alert-danger m-2" role="alert">
+                        {% for field in form %}
+                        {% for error in field.errors %}
+                        <strong>{{ error|escape }}</strong>
+                        {% endfor %}
+                        {% endfor %}
+                        {% for error in form.non_field_errors %}
+                        <strong>{{ error|escape }}</strong>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+            </form>
+            {% if list_items %}
+            <table class="table my-4">
+                <thead>
+                    <tr>
+                        <th scope="col">ID Prod.</th>
+                        <th scope="col">Producto</th>
+                        <th scope="col">Precio/U</th>
+                        <th scope="col">Cantidad</th>
+                        <th scope="col">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in list_items.all %}
+                    <tr>
+                        <th>{{ item.item.id }}</th>
+                        <td>{{ item.item.name }}</td>
+                        <td>{{ item.item.sale_price }}</td>
+                        <td>{{ item.quantity }}</td>
+                        <td>
+                            <div class="row" style="--bs-gutter-x: 0rem;">
+                              <div class="col">
+                                <form method="POST" action="{% url 'app_items:subtract-item' item.pk %}">{%csrf_token %}
+                                  <button class="btn btn-primary " type="submit" role="button">
+                                    <div class="sb-nav-link-icon"><i class="fas fa-minus"></i></div>
+                                  </button>
+                                </form>
+                              </div>
+                              <div class="col">
+                                <form method="POST" action="{% url 'app_items:add-item' item.pk %}">{% csrf_token %}
+                                  <button class="btn btn-primary" type="submit" role="button">
+                                    <div class="sb-nav-link-icon"><i class="fas fa-plus"></i></div>
+                                  </button>
+                                </form>
+                              </div>
+                              <div class="col">
+                                <form method="POST" action="{% url 'app_items:delete-item' item.pk %}">{% csrf_token%}
+                                  <button class="btn btn-primary" type="submit" role="button">
+                                    <div class="sb-nav-link-icon"><i class="fas fa-times"></i></div>
+                                  </button>
+                                </form>
+                              </div>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <div class="card m-4">
+                <div class="card-body text-center">
+                    <h4>Añade elementos al pedido</h4>
+                </div>
+            </div>
+            {% endif %}
+            <form method="POST" action="{% url 'app_orders:send-order' %}">{% csrf_token %}
+                <div class="row">
+                    <button type="submit" class="btn btn-primary btn-lg">Enviar pedido</button>
+                </div>
+            </form>
+            <form method="GET" action="{% url 'app_users:user-logout' %}">
+                <div class="row">
+                    <button type="submit" class="btn btn-primary btn-lg mt-2">Cerrar sesión</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock content %}
